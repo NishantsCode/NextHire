@@ -1,11 +1,11 @@
-import nodemailer from 'nodemailer';
+import { createTransport } from 'nodemailer';
 
 // Create transporter - supports both Gmail (local) and Resend (production)
 const createTransporter = () => {
   // Option 1: Use Resend (recommended for production - works on all hosting platforms)
   if (process.env.RESEND_API_KEY) {
     console.log('📧 Creating email transporter with Resend API');
-    return nodemailer.createTransporter({
+    return createTransport({
       host: 'smtp.resend.com',
       port: 465,
       secure: true,
@@ -28,7 +28,7 @@ const createTransporter = () => {
   console.log('⚠️  Note: Gmail may not work in production due to SMTP port blocking');
   console.log('⚠️  For production, use Resend: https://resend.com');
 
-  return nodemailer.createTransporter({
+  return createTransport({
     host: 'smtp.gmail.com',
     port: 587,
     secure: false,
