@@ -21,7 +21,9 @@ const corsOptions = {
         
         const allowedOrigins = [
             'http://localhost:5173',
-            process.env.FRONTEND_URL
+            'http://localhost:5174',
+            process.env.FRONTEND_URL,
+            'https://nexthirejob.vercel.app'
         ].filter(Boolean); // Remove undefined values
         
         console.log('Request origin:', origin);
@@ -35,9 +37,11 @@ const corsOptions = {
         }
     },
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    exposedHeaders: ['set-cookie']
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
+    exposedHeaders: ['set-cookie'],
+    preflightContinue: false,
+    optionsSuccessStatus: 204
 };
 
 app.use(cors(corsOptions));
@@ -48,8 +52,20 @@ app.use('/uploads', express.static('uploads'))
 const PORT = process.env.PORT;
 
 app.get('/', (req, res) => {
-    res.send("Server is working.")
-    console.log("Server is working.")
+    res.json({
+        success: true,
+        message: "Server is working",
+        timestamp: new Date().toISOString()
+    })
+})
+
+app.get('/health', (req, res) => {
+    res.json({
+        success: true,
+        message: "Server is healthy",
+        environment: process.env.NODE_ENV,
+        timestamp: new Date().toISOString()
+    })
 })
 
 app.use('/api/auth', authUserRoutes);

@@ -12,14 +12,19 @@ const generateToken = (userId, res) => {
         httpOnly: true,
         sameSite: isProduction ? "none" : "lax",
         secure: isProduction,
-        path: '/'
+        path: '/',
+        domain: isProduction ? undefined : undefined // Let browser handle domain
     };
     
     console.log('Setting cookie with options:', cookieOptions);
     console.log('Is Production:', isProduction);
     console.log('NODE_ENV:', process.env.NODE_ENV);
+    console.log('Token being set:', token.substring(0, 20) + '...');
     
     res.cookie("jwt", token, cookieOptions);
+    
+    // Also return token in response body as fallback
+    return token;
 }
 
 export default generateToken;

@@ -6,11 +6,13 @@ const isLogin = async (req, res, next) => {
         console.log('=== isLogin Middleware ===');
         console.log('Cookies:', req.cookies);
         console.log('Headers:', req.headers);
+        console.log('Origin:', req.get('origin'));
         
         const token = req.cookies.jwt;
 
         if (!token) {
             console.log('No token found in cookies');
+            console.log('All cookies:', Object.keys(req.cookies));
             return res.status(401).json({
                 success: false,
                 message: 'Unauthorized - No token provided'
@@ -41,14 +43,15 @@ const isLogin = async (req, res, next) => {
             });
         }
 
-        console.log('User authenticated:', user.email);
+        console.log('User authenticated:', user.email, 'Role:', user.role);
         req.user = user;
         next();
     } catch (error) {
         console.error('Error in isLogin middleware:', error.message);
         res.status(401).json({
             success: false,
-            message: 'Unauthorized - Invalid token'
+            message: 'Unauthorized - Invalid token',
+            error: error.message
         });
     }
 };
