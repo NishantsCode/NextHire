@@ -116,6 +116,10 @@ export const login = async (req, res) => {
             });
         }
 
+        console.log('=== Login Successful ===');
+        console.log('User:', user.email);
+        console.log('Generating token...');
+        
         generateToken(user._id, res);
 
         const userResponse = {
@@ -135,12 +139,15 @@ export const login = async (req, res) => {
             userResponse.resume = user.resume;
         }
 
+        console.log('Sending response with user data');
+        
         res.status(200).json({
             success: true,
             message: "Login successful",
             user: userResponse
         });
     } catch (error) {
+        console.error('Login error:', error);
         res.status(500).json({
             success: false,
             message: error.message || "Login failed"
