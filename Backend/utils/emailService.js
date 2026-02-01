@@ -2,12 +2,23 @@ import nodemailer from 'nodemailer';
 
 // Create transporter
 const createTransporter = () => {
+  // Validate environment variables
+  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
+    console.error('Email configuration missing: EMAIL_USER or EMAIL_PASSWORD not set');
+    throw new Error('Email service not configured properly');
+  }
+
   return nodemailer.createTransport({
     service: 'gmail',
     auth: {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASSWORD, // Use App Password, not regular password
     },
+    // Add these options for better reliability
+    pool: true,
+    maxConnections: 1,
+    rateDelta: 20000,
+    rateLimit: 5,
   });
 };
 
@@ -164,20 +175,30 @@ const getStatusUpdateEmail = (applicantName, jobTitle, companyName, newStatus) =
 // Send application confirmation email
 export const sendApplicationConfirmationEmail = async (applicantEmail, applicantName, jobTitle, companyName) => {
   try {
+    console.log(`Attempting to send application confirmation email to ${applicantEmail}`);
+    console.log(`Email config - User: ${process.env.EMAIL_USER ? 'SET' : 'NOT SET'}, Password: ${process.env.EMAIL_PASSWORD ? 'SET' : 'NOT SET'}`);
+    
     const transporter = createTransporter();
     const emailContent = getApplicationConfirmationEmail(applicantName, jobTitle, companyName);
 
-    await transporter.sendMail({
+    const info = await transporter.sendMail({
       from: `"NextHire" <${process.env.EMAIL_USER}>`,
       to: applicantEmail,
       subject: emailContent.subject,
       html: emailContent.html,
     });
 
-    console.log(`Application confirmation email sent to ${applicantEmail}`);
-    return { success: true };
+    console.log(`✓ Application confirmation email sent to ${applicantEmail}`, info.messageId);
+    return { success: true, messageId: info.messageId };
   } catch (error) {
-    console.error('Error sending application confirmation email:', error);
+    console.error('✗ Error sending application confirmation email:', {
+      to: applicantEmail,
+      error: error.message,
+      code: error.code,
+      command: error.command,
+      response: error.response,
+      responseCode: error.responseCode
+    });
     return { success: false, error: error.message };
   }
 };
@@ -185,20 +206,31 @@ export const sendApplicationConfirmationEmail = async (applicantEmail, applicant
 // Send status update email
 export const sendStatusUpdateEmail = async (applicantEmail, applicantName, jobTitle, companyName, newStatus) => {
   try {
+    console.log(`Attempting to send status update email to ${applicantEmail} - Status: ${newStatus}`);
+    console.log(`Email config - User: ${process.env.EMAIL_USER ? 'SET' : 'NOT SET'}, Password: ${process.env.EMAIL_PASSWORD ? 'SET' : 'NOT SET'}`);
+    
     const transporter = createTransporter();
     const emailContent = getStatusUpdateEmail(applicantName, jobTitle, companyName, newStatus);
 
-    await transporter.sendMail({
+    const info = await transporter.sendMail({
       from: `"NextHire" <${process.env.EMAIL_USER}>`,
       to: applicantEmail,
       subject: emailContent.subject,
       html: emailContent.html,
     });
 
-    console.log(`Status update email sent to ${applicantEmail} - Status: ${newStatus}`);
-    return { success: true };
+    console.log(`✓ Status update email sent to ${applicantEmail} - Status: ${newStatus}`, info.messageId);
+    return { success: true, messageId: info.messageId };
   } catch (error) {
-    console.error('Error sending status update email:', error);
+    console.error('✗ Error sending status update email:', {
+      to: applicantEmail,
+      status: newStatus,
+      error: error.message,
+      code: error.code,
+      command: error.command,
+      response: error.response,
+      responseCode: error.responseCode
+    });
     return { success: false, error: error.message };
   }
 };

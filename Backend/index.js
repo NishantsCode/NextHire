@@ -60,6 +60,7 @@ app.get('/health', (_req, res) => {
         success: true,
         message: "Server is healthy",
         environment: process.env.NODE_ENV,
+        emailConfigured: !!(process.env.EMAIL_USER && process.env.EMAIL_PASSWORD),
         timestamp: new Date().toISOString()
     })
 })
@@ -67,6 +68,41 @@ app.get('/health', (_req, res) => {
 app.use('/api/auth', authUserRoutes);
 app.use('/api/jobs', jobRoutes);
 app.use('/api/applications', applicationRoutes);
+
+// Test email endpoint (remove in production or protect with auth)
+app.post('/api/test-email', async (req, res) => {
+    try {
+        const { sendApplicationConfirmationEmail } = await import('./utils/emailService.js');
+        const { email } = req.body;
+        
+        if (!email) {
+            return res.status(400).json({
+                success: false,
+                message: 'Email address required'
+            });
+        }
+
+        const result = await sendApplicationConfirmationEmail(
+            email,
+            'Test User',
+            'Test Position',
+            'Test Company'
+        );
+
+        res.json({
+            success: result.success,
+            message: result.success ? 'Test email sent successfully' : 'Failed to send test email',
+            error: result.error,
+            messageId: result.messageId
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Error testing email',
+            error: error.message
+        });
+    }
+});
 
 
 
