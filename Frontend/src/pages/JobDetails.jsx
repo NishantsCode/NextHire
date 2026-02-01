@@ -5,6 +5,7 @@ import { useToast } from '../components/ui/Toast';
 import { getJobById, updateJob, deleteJob } from '../api/jobs';
 import { getApplicationsByJob, updateApplicationStatus, calculateATSScore, calculateJobATSScores, bulkUpdateStatus } from '../api/applications';
 import { ConfirmModal } from '../components/ui';
+import { getFileUrl } from '../config/api';
 
 export default function JobDetails() {
   const { jobId } = useParams();
@@ -346,7 +347,7 @@ export default function JobDetails() {
 function JobDetailsTab({ job }) {
   const handleDownloadJD = () => {
     if (job.jdFile?.path) {
-      const fileUrl = `http://localhost:4000/${job.jdFile.path}`;
+      const fileUrl = getFileUrl(job.jdFile.path);
       const link = document.createElement('a');
       link.href = fileUrl;
       
@@ -689,7 +690,7 @@ function ApplicantsTab({
                     <td className="py-3 px-4">
                       {app.resume ? (
                         <a
-                          href={`http://localhost:4000/${app.resume.path}`}
+                          href={getFileUrl(app.resume.path)}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-indigo-400 hover:text-indigo-300 text-sm flex items-center gap-1"

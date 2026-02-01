@@ -1,5 +1,6 @@
 import express from 'express'
 import dotenv from 'dotenv';
+import cors from 'cors';
 import dbConnect from "./Database/dbConnect.js"
 import authUserRoutes from "./Routes/authUser.js"
 import jobRoutes from "./Routes/job.js"
@@ -11,6 +12,32 @@ dbConnect();
 
 const app = express();
 
+// CORS configuration
+const corsOptions = {
+    origin: function (origin, callback) {
+        // Allow requests with no origin (like mobile apps or curl requests)
+        if (!origin) return callback(null, true);
+        
+        const allowedOrigins = [
+            'http://localhost:5173',
+            'http://localhost:3000',
+            'http://localhost:4173',
+            process.env.FRONTEND_URL
+        ].filter(Boolean); // Remove undefined values
+        
+        if (allowedOrigins.indexOf(origin) !== -1) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    exposedHeaders: ['set-cookie']
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(cookieParser())
 app.use('/uploads', express.static('uploads'))

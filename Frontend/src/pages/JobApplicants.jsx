@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getApplicationsByJob, updateApplicationStatus, calculateATSScore, calculateJobATSScores, bulkUpdateStatus } from '../api/applications';
+import { getFileUrl } from '../config/api';
 
 export default function JobApplicants() {
   const { jobId } = useParams();
@@ -352,7 +353,7 @@ export default function JobApplicants() {
                         <td className="py-3 px-6">
                           {app.resume ? (
                             <a
-                              href={`${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/${app.resume.path}`}
+                              href={getFileUrl(app.resume.path)}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="text-indigo-400 hover:text-indigo-300 text-sm flex items-center gap-1 transition-colors"

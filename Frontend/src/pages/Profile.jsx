@@ -5,6 +5,7 @@ import { logout } from '../api/auth';
 import { useUser } from '../context/UserContext';
 import ProfileModal from '../components/ProfileModal';
 import { useToast } from '../components/ui/Toast';
+import { getFileUrl } from '../config/api';
 
 export default function Profile() {
   const { user, setUser, loading: userLoading } = useUser();
@@ -232,7 +233,7 @@ export default function Profile() {
                               </svg>
                             </button>
                             <a 
-                              href={application.resume ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${application.resume}` : '#'}
+                              href={getFileUrl(application.resume)}
                               target="_blank"
                               rel="noopener noreferrer"
                               className={`transition-colors ${application.resume ? 'text-emerald-400 hover:text-emerald-300' : 'text-slate-500 cursor-not-allowed'}`}
