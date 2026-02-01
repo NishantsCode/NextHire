@@ -48,7 +48,6 @@ export default function Dashboard() {
       const response = await getJobs()
       setJobs(response.jobs)
     } catch (err) {
-      console.error('Failed to fetch jobs:', err)
       toast.error('Failed to load jobs')
     } finally {
       setJobsLoading(false)
@@ -62,7 +61,6 @@ export default function Dashboard() {
       toast.success('Logged out successfully')
       navigate('/login')
     } catch (err) {
-      console.error('Logout failed:', err)
       toast.error('Logout failed')
     }
   }
@@ -78,7 +76,6 @@ export default function Dashboard() {
       toast.success('Job deleted successfully')
       fetchJobs()
     } catch (err) {
-      console.error('Failed to delete job:', err)
       toast.error('Failed to delete job')
     } finally {
       setDeleting(false)
@@ -416,7 +413,6 @@ export default function Dashboard() {
                         toast.success(`Job ${newStatus === 'active' ? 'activated' : 'closed'} successfully`);
                         fetchJobs();
                       } catch (err) {
-                        console.error('Failed to update job status:', err);
                         toast.error('Failed to update job status');
                       }
                     }}

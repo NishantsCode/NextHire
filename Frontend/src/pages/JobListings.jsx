@@ -60,7 +60,7 @@ export default function JobListings() {
         setSelectedJob(response.jobs[0]);
       }
     } catch (err) {
-      console.error('Failed to fetch jobs:', err);
+      // Error fetching jobs
     } finally {
       setLoading(false);
     }
@@ -71,7 +71,7 @@ export default function JobListings() {
       const response = await getAppliedJobIds();
       setAppliedJobIds(response.appliedJobIds || []);
     } catch (err) {
-      console.error('Failed to fetch applied jobs:', err);
+      // Error fetching applied jobs
     }
   };
 
@@ -81,7 +81,7 @@ export default function JobListings() {
       setUser(null);
       navigate('/login');
     } catch (err) {
-      console.error('Logout failed:', err);
+      // Error logging out
     }
   };
 

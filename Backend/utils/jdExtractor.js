@@ -12,21 +12,14 @@ let genAI = null;
 
 function getGeminiAI() {
     if (genAI === null) {
-        console.log('\n🔧 Initializing Gemini AI...');
-        console.log('API Key present:', !!process.env.GEMINI_API_KEY);
-        console.log('API Key value:', process.env.GEMINI_API_KEY ? process.env.GEMINI_API_KEY.substring(0, 20) + '...' : 'NOT SET');
-        
         if (process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== 'your_gemini_api_key_here') {
             try {
                 genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-                console.log('✅ Gemini AI initialized successfully');
             } catch (error) {
-                console.error('❌ Failed to initialize Gemini AI:', error.message);
-                genAI = false; // Mark as failed
+                genAI = false;
             }
         } else {
-            console.log('⚠️ Gemini API key not configured');
-            genAI = false; // Mark as not configured
+            genAI = false;
         }
     }
     return genAI === false ? null : genAI;
@@ -41,7 +34,6 @@ async function extractFromPDF(filePath) {
         const data = await pdfParse(dataBuffer);
         return data.text;
     } catch (error) {
-        console.error('PDF extraction error:', error);
         throw new Error('Failed to extract text from PDF. Error: ' + error.message);
     }
 }
@@ -54,7 +46,6 @@ async function extractFromDoc(filePath) {
         const result = await mammoth.extractRawText({ path: filePath });
         return result.value;
     } catch (error) {
-        console.error('DOC extraction error:', error);
         throw new Error('Failed to extract text from DOC file. Make sure mammoth is installed.');
     }
 }
@@ -67,7 +58,6 @@ async function extractFromTxt(filePath) {
         const text = fs.readFileSync(filePath, 'utf-8');
         return text;
     } catch (error) {
-        console.error('TXT extraction error:', error);
         throw new Error('Failed to read text file. Error: ' + error.message);
     }
 }
@@ -85,8 +75,6 @@ async function parseJobDetailsWithAI(text) {
     }
     
     try {
-        console.log('\n🤖 Using Gemini AI for structured JD parsing...');
-        
         const model = ai.getGenerativeModel({ 
             model: "gemini-2.5-flash"
         });
@@ -185,27 +173,17 @@ Soft skills like "self-driven", "critical thinker", "problem solver", "detail-or
 
 Return the structured JSON now:`;
 
-        console.log('📤 Sending to Gemini AI for parsing...');
         const result = await model.generateContent(prompt);
         const response = await result.response;
         const aiText = response.text();
         
-        console.log('📥 Received AI response');
-        
         // Extract JSON from response
         const jsonMatch = aiText.match(/\{[\s\S]*\}/);
         if (!jsonMatch) {
-            console.log('⚠️ Could not extract JSON, falling back to rule-based parsing');
             throw new Error('Invalid AI response format');
         }
         
         const structured = JSON.parse(jsonMatch[0]);
-        
-        console.log('✅ Successfully parsed structured JD:');
-        console.log('  Title:', structured.title);
-        console.log('  Responsibilities:', structured.rolesAndResponsibilities?.length || 0);
-        console.log('  Required Skills:', structured.requiredSkills?.length || 0);
-        console.log('  Experience:', structured.experience);
         
         // Create formatted description
         const formattedDescription = formatStructuredJD(structured);
@@ -227,7 +205,6 @@ Return the structured JSON now:`;
             }
         };
     } catch (error) {
-        console.error('AI parsing error:', error);
         throw new Error('Failed to parse JD with Gemini AI: ' + error.message);
     }
 }
@@ -300,8 +277,6 @@ function formatStructuredJD(structured) {
  */
 export async function extractJobFromFile(filePath, mimetype) {
     try {
-        console.log('\n📄 Extracting JD from file...');
-        console.log('File type:', mimetype);
         let extractedText = '';
 
         if (mimetype === 'application/pdf') {
@@ -317,8 +292,6 @@ export async function extractJobFromFile(filePath, mimetype) {
             throw new Error('Unsupported file type. Please upload PDF, Word (.doc, .docx), or Text (.txt) files.');
         }
 
-        console.log('✅ Text extracted, length:', extractedText.length);
-
         // Check if Gemini API key is configured (lazy check)
         const ai = getGeminiAI();
         
@@ -326,10 +299,8 @@ export async function extractJobFromFile(filePath, mimetype) {
             throw new Error('Gemini AI is required for JD extraction. Please configure GEMINI_API_KEY in your .env file.');
         }
         
-        console.log('🤖 Using Gemini AI for structured parsing...');
         return await parseJobDetailsWithAI(extractedText);
     } catch (error) {
-        console.error('Job extraction error:', error);
         throw error;
     }
 }

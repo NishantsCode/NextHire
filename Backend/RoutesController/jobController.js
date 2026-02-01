@@ -29,7 +29,6 @@ export const createJob = async (req, res, next) => {
                     jobData.structuredJD = extractedData.structuredJD;
                 }
             } catch (extractError) {
-                console.error('Extraction error:', extractError);
                 // If extraction fails, continue with manual input if provided
                 if (!title || !description) {
                     return res.status(400).json({
@@ -45,7 +44,7 @@ export const createJob = async (req, res, next) => {
             try {
                 jobData.structuredJD = JSON.parse(structuredJD);
             } catch (parseError) {
-                console.error('Failed to parse structuredJD:', parseError);
+                // Ignore parse errors, continue without structured JD
             }
         } else if (structuredJD && typeof structuredJD === 'object') {
             jobData.structuredJD = structuredJD;

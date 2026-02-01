@@ -12,8 +12,6 @@ class ErrorBoundary extends Component {
 
   componentDidCatch(error, errorInfo) {
     this.setState({ error, errorInfo });
-    // Log to error reporting service in production
-    console.error('Error caught by boundary:', error, errorInfo);
   }
 
   handleRetry = () => {

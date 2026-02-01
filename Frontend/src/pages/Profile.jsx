@@ -35,7 +35,7 @@ export default function Profile() {
       const response = await getMyApplications();
       setApplications(response.applications);
     } catch (err) {
-      console.error('Failed to fetch applications:', err);
+      // Error fetching applications
     } finally {
       setLoading(false);
     }
@@ -47,7 +47,7 @@ export default function Profile() {
       setUser(null);
       navigate('/login');
     } catch (err) {
-      console.error('Logout failed:', err);
+      // Error logging out
     }
   };
 

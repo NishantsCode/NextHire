@@ -26,13 +26,9 @@ const corsOptions = {
             'https://nexthirejob.vercel.app'
         ].filter(Boolean); // Remove undefined values
         
-        console.log('Request origin:', origin);
-        console.log('Allowed origins:', allowedOrigins);
-        
         if (allowedOrigins.indexOf(origin) !== -1) {
             callback(null, true);
         } else {
-            console.log('Origin not allowed:', origin);
             callback(new Error('Not allowed by CORS'));
         }
     },
@@ -51,7 +47,7 @@ app.use('/uploads', express.static('uploads'))
 
 const PORT = process.env.PORT;
 
-app.get('/', (req, res) => {
+app.get('/', (_req, res) => {
     res.json({
         success: true,
         message: "Server is working",
@@ -59,7 +55,7 @@ app.get('/', (req, res) => {
     })
 })
 
-app.get('/health', (req, res) => {
+app.get('/health', (_req, res) => {
     res.json({
         success: true,
         message: "Server is healthy",

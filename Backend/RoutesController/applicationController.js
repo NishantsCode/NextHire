@@ -81,7 +81,7 @@ export const createApplication = async (req, res) => {
             fullname,
             job.title,
             job.createdBy?.organizationname || 'the company'
-        ).catch(err => console.error('Email sending failed:', err));
+        ).catch(() => {});
 
         res.status(201).json({
             success: true,
@@ -166,7 +166,7 @@ export const updateApplicationStatus = async (req, res) => {
                 application.jobId.title,
                 req.user.organizationname,
                 status
-            ).catch(err => console.error('Email sending failed:', err));
+            ).catch(() => {});
         }
 
         res.status(200).json({

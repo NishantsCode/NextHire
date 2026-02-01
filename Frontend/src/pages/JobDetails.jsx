@@ -38,7 +38,6 @@ export default function JobDetails() {
       const response = await getJobById(jobId);
       setJob(response.job);
     } catch (err) {
-      console.error('Failed to fetch job:', err);
       toast.error('Failed to load job details');
       navigate('/dashboard');
     } finally {
@@ -60,7 +59,7 @@ export default function JobDetails() {
       });
       setApplications(sortedApplications);
     } catch (err) {
-      console.error('Failed to fetch applications:', err);
+      // Error fetching applications
     }
   };
 

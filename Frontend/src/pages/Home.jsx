@@ -41,7 +41,7 @@ export default function Home() {
         .slice(0, 5);
       setJobs(activeJobs);
     } catch (err) {
-      console.error('Failed to fetch jobs:', err);
+      // Error fetching jobs
     } finally {
       setLoading(false);
     }

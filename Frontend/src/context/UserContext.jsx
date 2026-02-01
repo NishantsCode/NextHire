@@ -15,7 +15,7 @@ export const UserProvider = ({ children }) => {
           setUser(response.user)
         }
       } catch (error) {
-        console.log('Not authenticated')
+        // Not authenticated
       } finally {
         setLoading(false)
       }

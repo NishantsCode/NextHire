@@ -38,7 +38,7 @@ export default function JobApplicants() {
       setApplications(sortedApplications);
       setJob(response.job);
     } catch (err) {
-      console.error('Failed to fetch applications:', err);
+      // Error fetching applications
     } finally {
       setLoading(false);
     }
@@ -49,7 +49,7 @@ export default function JobApplicants() {
       await updateApplicationStatus(applicationId, newStatus);
       fetchApplications();
     } catch (err) {
-      console.error('Failed to update status:', err);
+      // Error updating status
     }
   };
 
@@ -104,7 +104,7 @@ export default function JobApplicants() {
       setShowBulkActions(false);
       fetchApplications();
     } catch (err) {
-      console.error('Failed to update statuses:', err);
+      // Error updating statuses
     }
   };
 

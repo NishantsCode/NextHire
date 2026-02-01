@@ -115,10 +115,6 @@ export const login = async (req, res) => {
                 message: "Invalid credentials"
             });
         }
-
-        console.log('=== Login Successful ===');
-        console.log('User:', user.email);
-        console.log('Generating token...');
         
         generateToken(user._id, res);
 
@@ -138,8 +134,6 @@ export const login = async (req, res) => {
         if (user.resume) {
             userResponse.resume = user.resume;
         }
-
-        console.log('Sending response with user data');
         
         res.status(200).json({
             success: true,
@@ -147,7 +141,6 @@ export const login = async (req, res) => {
             user: userResponse
         });
     } catch (error) {
-        console.error('Login error:', error);
         res.status(500).json({
             success: false,
             message: error.message || "Login failed"
