@@ -1,48 +1,21 @@
 import { createTransport } from 'nodemailer';
 
-// Create transporter - supports both Gmail (local) and Resend (production)
+// Create transporter with Gmail
 const createTransporter = () => {
-  // Option 1: Use Resend (recommended for production - works on all hosting platforms)
-  if (process.env.RESEND_API_KEY) {
-    console.log('📧 Creating email transporter with Resend API');
-    return createTransport({
-      host: 'smtp.resend.com',
-      port: 465,
-      secure: true,
-      auth: {
-        user: 'resend',
-        pass: process.env.RESEND_API_KEY,
-      },
-    });
-  }
-
-  // Option 2: Use Gmail (for local development only - may not work in production)
   if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
-    console.error('❌ Email configuration missing');
-    console.error('For production: Set RESEND_API_KEY');
-    console.error('For local dev: Set EMAIL_USER and EMAIL_PASSWORD');
+    console.error('❌ Email configuration missing: EMAIL_USER or EMAIL_PASSWORD not set');
     throw new Error('Email service not configured properly');
   }
 
   console.log('📧 Creating email transporter with Gmail');
-  console.log('⚠️  Note: Gmail may not work in production due to SMTP port blocking');
-  console.log('⚠️  For production, use Resend: https://resend.com');
+  console.log('📧 Email User:', process.env.EMAIL_USER);
 
   return createTransport({
-    host: 'smtp.gmail.com',
-    port: 587,
-    secure: false,
+    service: 'gmail',
     auth: {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASSWORD,
     },
-    connectionTimeout: 10000,
-    greetingTimeout: 10000,
-    socketTimeout: 10000,
-    pool: true,
-    maxConnections: 1,
-    rateDelta: 20000,
-    rateLimit: 5,
   });
 };
 
@@ -200,24 +173,19 @@ const getStatusUpdateEmail = (applicantName, jobTitle, companyName, newStatus) =
 export const sendApplicationConfirmationEmail = async (applicantEmail, applicantName, jobTitle, companyName) => {
   try {
     console.log(`📧 Attempting to send application confirmation email to ${applicantEmail}`);
-    console.log(`📧 Email provider: ${process.env.RESEND_API_KEY ? 'Resend' : 'Gmail'}`);
     
     const transporter = createTransporter();
     const emailContent = getApplicationConfirmationEmail(applicantName, jobTitle, companyName);
 
-    // Determine from email based on provider
-    const fromEmail = process.env.RESEND_API_KEY 
-      ? (process.env.EMAIL_FROM || 'onboarding@resend.dev')
-      : process.env.EMAIL_USER;
-
     const info = await transporter.sendMail({
-      from: `"NextHire" <${fromEmail}>`,
+      from: `"NextHire" <${process.env.EMAIL_USER}>`,
       to: applicantEmail,
       subject: emailContent.subject,
       html: emailContent.html,
     });
 
-    console.log(`✅ Application confirmation email sent to ${applicantEmail}`, info.messageId);
+    console.log(`✅ Application confirmation email sent successfully!`);
+    console.log(`✅ Message ID: ${info.messageId}`);
     return { success: true, messageId: info.messageId };
   } catch (error) {
     console.error('❌ Error sending application confirmation email:', {
@@ -236,24 +204,19 @@ export const sendApplicationConfirmationEmail = async (applicantEmail, applicant
 export const sendStatusUpdateEmail = async (applicantEmail, applicantName, jobTitle, companyName, newStatus) => {
   try {
     console.log(`📧 Attempting to send status update email to ${applicantEmail} - Status: ${newStatus}`);
-    console.log(`📧 Email provider: ${process.env.RESEND_API_KEY ? 'Resend' : 'Gmail'}`);
     
     const transporter = createTransporter();
     const emailContent = getStatusUpdateEmail(applicantName, jobTitle, companyName, newStatus);
 
-    // Determine from email based on provider
-    const fromEmail = process.env.RESEND_API_KEY 
-      ? (process.env.EMAIL_FROM || 'onboarding@resend.dev')
-      : process.env.EMAIL_USER;
-
     const info = await transporter.sendMail({
-      from: `"NextHire" <${fromEmail}>`,
+      from: `"NextHire" <${process.env.EMAIL_USER}>`,
       to: applicantEmail,
       subject: emailContent.subject,
       html: emailContent.html,
     });
 
-    console.log(`✅ Status update email sent to ${applicantEmail} - Status: ${newStatus}`, info.messageId);
+    console.log(`✅ Status update email sent successfully!`);
+    console.log(`✅ Message ID: ${info.messageId}`);
     return { success: true, messageId: info.messageId };
   } catch (error) {
     console.error('❌ Error sending status update email:', {
