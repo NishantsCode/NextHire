@@ -1,13 +1,37 @@
 import { createTransport } from 'nodemailer';
+import { Resend } from 'resend';
 
-// Create transporter with Gmail
-const createTransporter = () => {
-  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
-    console.error('❌ Email configuration missing: EMAIL_USER or EMAIL_PASSWORD not set');
-    throw new Error('Email service not configured properly');
+// Determine which email provider to use
+const getEmailProvider = () => {
+  if (process.env.RESEND_API_KEY) {
+    return 'resend';
+  } else if (process.env.EMAIL_USER && process.env.EMAIL_PASSWORD) {
+    return 'gmail';
+  }
+  return null;
+};
+
+// Create Resend client
+const createResendClient = () => {
+  if (!process.env.RESEND_API_KEY) {
+    console.error('❌ Email configuration missing: RESEND_API_KEY not set');
+    throw new Error('Resend API key not configured');
   }
 
-  console.log('📧 Creating email transporter with Gmail');
+  console.log('📧 Creating Resend email client');
+  console.log('📧 Email From:', process.env.EMAIL_FROM || 'onboarding@resend.dev');
+  
+  return new Resend(process.env.RESEND_API_KEY);
+};
+
+// Create transporter with Gmail (fallback for local development)
+const createGmailTransporter = () => {
+  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
+    console.error('❌ Email configuration missing: EMAIL_USER or EMAIL_PASSWORD not set');
+    throw new Error('Gmail credentials not configured');
+  }
+
+  console.log('📧 Creating Gmail transporter');
   console.log('📧 Email User:', process.env.EMAIL_USER);
 
   return createTransport({
@@ -174,17 +198,42 @@ export const sendApplicationConfirmationEmail = async (applicantEmail, applicant
   try {
     console.log(`📧 Attempting to send application confirmation email to ${applicantEmail}`);
     
-    const transporter = createTransporter();
+    const provider = getEmailProvider();
+    
+    if (!provider) {
+      throw new Error('No email provider configured. Set either RESEND_API_KEY or EMAIL_USER/EMAIL_PASSWORD');
+    }
+
+    console.log(`📧 Email provider: ${provider === 'resend' ? 'Resend' : 'Gmail'}`);
+    
     const emailContent = getApplicationConfirmationEmail(applicantName, jobTitle, companyName);
 
-    const info = await transporter.sendMail({
-      from: `"NextHire" <${process.env.EMAIL_USER}>`,
-      to: applicantEmail,
-      subject: emailContent.subject,
-      html: emailContent.html,
-    });
+    let info;
+    
+    if (provider === 'resend') {
+      // Use Resend
+      const resend = createResendClient();
+      const result = await resend.emails.send({
+        from: process.env.EMAIL_FROM || 'NextHire <onboarding@resend.dev>',
+        to: applicantEmail,
+        subject: emailContent.subject,
+        html: emailContent.html,
+      });
+      
+      info = { messageId: result.data?.id || result.id };
+      console.log(`✅ Application confirmation email sent successfully via Resend!`);
+    } else {
+      // Use Gmail
+      const transporter = createGmailTransporter();
+      info = await transporter.sendMail({
+        from: `"NextHire" <${process.env.EMAIL_USER}>`,
+        to: applicantEmail,
+        subject: emailContent.subject,
+        html: emailContent.html,
+      });
+      console.log(`✅ Application confirmation email sent successfully via Gmail!`);
+    }
 
-    console.log(`✅ Application confirmation email sent successfully!`);
     console.log(`✅ Message ID: ${info.messageId}`);
     return { success: true, messageId: info.messageId };
   } catch (error) {
@@ -205,17 +254,42 @@ export const sendStatusUpdateEmail = async (applicantEmail, applicantName, jobTi
   try {
     console.log(`📧 Attempting to send status update email to ${applicantEmail} - Status: ${newStatus}`);
     
-    const transporter = createTransporter();
+    const provider = getEmailProvider();
+    
+    if (!provider) {
+      throw new Error('No email provider configured. Set either RESEND_API_KEY or EMAIL_USER/EMAIL_PASSWORD');
+    }
+
+    console.log(`📧 Email provider: ${provider === 'resend' ? 'Resend' : 'Gmail'}`);
+    
     const emailContent = getStatusUpdateEmail(applicantName, jobTitle, companyName, newStatus);
 
-    const info = await transporter.sendMail({
-      from: `"NextHire" <${process.env.EMAIL_USER}>`,
-      to: applicantEmail,
-      subject: emailContent.subject,
-      html: emailContent.html,
-    });
+    let info;
+    
+    if (provider === 'resend') {
+      // Use Resend
+      const resend = createResendClient();
+      const result = await resend.emails.send({
+        from: process.env.EMAIL_FROM || 'NextHire <onboarding@resend.dev>',
+        to: applicantEmail,
+        subject: emailContent.subject,
+        html: emailContent.html,
+      });
+      
+      info = { messageId: result.data?.id || result.id };
+      console.log(`✅ Status update email sent successfully via Resend!`);
+    } else {
+      // Use Gmail
+      const transporter = createGmailTransporter();
+      info = await transporter.sendMail({
+        from: `"NextHire" <${process.env.EMAIL_USER}>`,
+        to: applicantEmail,
+        subject: emailContent.subject,
+        html: emailContent.html,
+      });
+      console.log(`✅ Status update email sent successfully via Gmail!`);
+    }
 
-    console.log(`✅ Status update email sent successfully!`);
     console.log(`✅ Message ID: ${info.messageId}`);
     return { success: true, messageId: info.messageId };
   } catch (error) {
