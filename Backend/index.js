@@ -106,7 +106,7 @@ app.post('/api/test-email', async (req, res) => {
 });
 
 
-if(dev){d
+if(dev){
 
 app.listen(PORT, ()=> {
     console.log(`Server is running on Port: ${PORT}`);
