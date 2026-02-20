@@ -11,6 +11,7 @@ dotenv.config();
 dbConnect();
 
 const app = express();
+const dev=process.env.IS_DEV?true:false;
 
 app.set('trust proxy', 1)
 // CORS configuration
@@ -105,7 +106,9 @@ app.post('/api/test-email', async (req, res) => {
 });
 
 
+if(dev){d
 
 app.listen(PORT, ()=> {
     console.log(`Server is running on Port: ${PORT}`);
 })
+}
